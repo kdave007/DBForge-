@@ -40,10 +40,46 @@ class DBFModel:
             List[Dict[str, Any]]: List of dictionaries containing field information
                                  Each dict should have: name, type, length, decimal
         """
-        valid = self.validate_dbf(dbf_path)
+        valid = self.validate_dbf()
         if not valid:
             return []
 
-        with DBF(self.dbf_path) as dbf:
-            for field in dbf.fields:
-                print(field.field_name, field.field_type, field.field_length, field.decimal_count)
+        field_info = []
+        try:
+            with DBF(self.dbf_path) as dbf:
+                for field in dbf.fields:
+                    field_info.append({
+                        'name': field.field_name,
+                        'type': field.field_type,
+                        'length': field.field_length,
+                        'decimal': field.decimal_count
+                    })
+            return field_info
+        
+        except Exception as e:
+            print(f"Error reading DBF file {self.dbf_path}: {e}")
+            return []
+
+    def get_table_name(self) -> str:
+        """
+        Get the table name from the DBF file (usually the file name without extension).
+        Makes the name database-friendly by:
+        - Converting to lowercase
+        - Replacing spaces with underscores
+        - Removing special characters
+        
+        Returns:
+            str: The sanitized table name
+        """
+        import re
+        
+        # Get the base filename without extension
+        file_name = os.path.basename(self.dbf_path)
+        table_name = os.path.splitext(file_name)[0]
+        
+        # Make it database-friendly
+        table_name = table_name.lower()  # Convert to lowercase
+        table_name = re.sub(r'\s+', '_', table_name)  # Replace spaces with underscores
+        table_name = re.sub(r'[^a-z0-9_]', '', table_name)  # Remove special chars
+        
+        return table_name
