@@ -32,7 +32,7 @@ class DBFModel:
             print(f"Error reading DBF file {self.dbf_path}: {e}")
             return False
 
-    def read_file_info(self) -> List[Dict[str, Any]]:
+    def read_field_info(self) -> List[Dict[str, Any]]:
         """
         Read and return field information from the DBF file.
         
@@ -49,10 +49,10 @@ class DBFModel:
             with DBF(self.dbf_path) as dbf:
                 for field in dbf.fields:
                     field_info.append({
-                        'name': field.field_name,
-                        'type': field.field_type,
-                        'length': field.field_length,
-                        'decimal': field.decimal_count
+                        'name': field.name,
+                        'type': field.type,
+                        'length': field.length,
+                        'decimal': field.decimal if hasattr(field, 'decimal') else 0
                     })
             return field_info
         
