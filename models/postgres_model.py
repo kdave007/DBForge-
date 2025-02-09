@@ -1,14 +1,19 @@
 # postgres_model.py
 from typing import List, Dict, Any
+import config
 from .db_connection import DBConnection
 from .type_mapping import TypeMapping
+from .table_generators import get_generator
 
 class PostgresModel:
-    def __init__(self, db_config: Dict[str, str]) -> None:
+    def __init__(self, db_config: Dict[str, str] = config.DB_CONFIG) -> None:
         """
         Initialize with database connection parameters
         """
         self.db_config = db_config
+
+        # Delegate to factory function
+        self.generator = get_generator(self)
 
     def convert_field_type(self, dbf_field: Dict[str, Any]) -> str:
         """
@@ -45,7 +50,7 @@ class PostgresModel:
             raise ValueError("Table name must be a non empty string")
 
          # Check for existing ID fields
-        existing_ids = {'id', 'rowid', 'record_id', 'primary_key'}
+        existing_ids = {'id', 'rowid', 'record_id'}
         field_names = {field['name'].lower() for field in fields}
         
         # Choose a safe primary key name
@@ -54,16 +59,9 @@ class PostgresModel:
             "local_rowid"
         )    
 
-        # Generate field definitions
-        sql_field_definitions  = [f"{primary_key} SERIAL PRIMARY KEY"]
-        for field in fields:
-            f_name = field['name']
-            f_type = self.convert_field_type(field)
-            sql_field_definitions.append(f'{f_name} {f_type}')
-
-         # Build SQL
-        sql_str = f"CREATE TABLE {table_name} (\n"
-        sql_str += ",\n".join(f'  {fd}' for fd in sql_field_definitions)
-        sql_str += "\n);"
-
-        return sql_str 
+        # Delegate to generator with validation context
+        return self.generator.generate_table(
+            table_name=table_name,
+            fields=fields,
+            primary_key=primary_key
+        )

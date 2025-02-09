@@ -1,4 +1,8 @@
 # test_postgres_model.py
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from models.dbf_model import DBFModel
 from models.postgres_model import PostgresModel
 
