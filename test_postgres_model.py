@@ -12,7 +12,7 @@ def test_integration():
     """
      try:
         # Initialize models
-        dbf_model = DBFModel("mockDBF/PARTVTA.dbf")
+        dbf_model = DBFModel()
         postgres_model = PostgresModel({})  # Empty config
         
         # Set DBF path

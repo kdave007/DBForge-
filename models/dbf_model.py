@@ -1,10 +1,30 @@
 from dbfread import DBF
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import os
+from config import PATH_CONFIG
 
 class DBFModel:
-    def __init__(self, dbf_path: str) -> None:
-        self.dbf_path = dbf_path
+    def __init__(self, dbf_filename: Optional[str] = None) -> None:
+        """
+        Initialize DBFModel with an optional filename/path.
+        If no filename is provided, it will use the path from config.ini
+        If a filename is provided, it will be used as is (if it's a full path)
+        or joined with the config directory (if it's just a filename)
+        
+        Args:
+            dbf_filename (Optional[str]): Path to DBF file or filename (optional)
+        """
+        if dbf_filename is None:
+            # Use path directly from config
+            self.dbf_path = str(PATH_CONFIG['dbf'])  # Convert Path to string
+        else:
+            # If it looks like a full path, use it as is
+            if os.path.isabs(dbf_filename) or '../' in dbf_filename:
+                self.dbf_path = dbf_filename
+            else:
+                # Otherwise join it with the config directory
+                self.dbf_path = str(os.path.join(PATH_CONFIG['dbf'], dbf_filename))  # Convert Path to string
+                
         self.dbf_data: List[Dict[str, Any]] = []
 
     def validate_dbf(self) -> bool:
@@ -20,7 +40,7 @@ class DBFModel:
             return False
             
         # Check file extension
-        if not self.dbf_path.lower().endswith('.dbf'):
+        if not str(self.dbf_path).lower().endswith('.dbf'):  # Convert to string before using lower()
             print(f"Error: File {self.dbf_path} is not a DBF file")
             return False
             
