@@ -20,7 +20,8 @@ def load_config():
             'password': 'secret'
         },
         'features': {
-            'table_mode': 'basic'
+            'table_mode': 'basic',
+            'preview_mode': 'false'  # Add default for preview mode
         }
     })
     
@@ -51,7 +52,8 @@ PATH_CONFIG = {
 # Feature flags and settings 
 # Mode can be: basic (pk only), timestamp (pk + created_at), audit (pk + created_at + updated_at)
 FEATURE_FLAGS = {
-    'table_mode': CONFIG['features'].get('table_mode', 'basic')  # Default to basic if not specified
+    'table_mode': CONFIG['features']['table_mode'],
+    'preview_mode': CONFIG['features'].getboolean('preview_mode', False)  # Convert to boolean
 }
 
 def get_table_mode():
