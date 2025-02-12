@@ -21,7 +21,8 @@ def load_config():
         },
         'features': {
             'table_mode': 'basic',
-            'preview_mode': 'false'  # Add default for preview mode
+            'preview_mode': 'false',  # Add default for preview mode
+            'preview_ext':'txt'
         }
     })
     
@@ -53,7 +54,8 @@ PATH_CONFIG = {
 # Mode can be: basic (pk only), timestamp (pk + created_at), audit (pk + created_at + updated_at)
 FEATURE_FLAGS = {
     'table_mode': CONFIG['features']['table_mode'],
-    'preview_mode': CONFIG['features'].getboolean('preview_mode', False)  # Convert to boolean
+    'preview_mode': CONFIG['features'].getboolean('preview_mode', False),  # Convert to boolean
+    'preview_ext': CONFIG['features']['preview_ext']
 }
 
 def get_table_mode():
@@ -62,3 +64,10 @@ def get_table_mode():
     if mode not in ['basic', 'timestamp', 'audit']:
         return 'basic'  # Default to basic mode if invalid setting
     return mode
+
+def get_preview_ext():
+    """Get the current extension"""
+    ext = FEATURE_FLAGS['preview_ext']
+    if ext not in ['txt','sql']:
+        return 'txt'
+    return ext

@@ -2,7 +2,8 @@ from typing import Optional
 import os
 from pathlib import Path
 from datetime import datetime
-from config import PATH_CONFIG
+from config import PATH_CONFIG, FEATURE_FLAGS
+import config
 
 class SQLPreview:
     """Handles SQL preview file generation"""
@@ -21,8 +22,10 @@ class SQLPreview:
             sql_content: SQL query content
             suffix: Optional suffix for the filename
             
+            
         Returns:
             str: Path to the generated file
+            ext: txt by default
         """
         # Generate timestamp for unique filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -31,7 +34,7 @@ class SQLPreview:
         filename = f"{table_name}_{timestamp}"
         if suffix:
             filename = f"{filename}_{suffix}"
-        filename = f"{filename}.sql"
+        filename = f"{filename}.{config.get_preview_ext()}"
         
         # Full path for the file
         file_path = self.output_dir / filename
@@ -45,3 +48,5 @@ class SQLPreview:
             f.write(header + sql_content)
         
         return str(file_path)
+
+
