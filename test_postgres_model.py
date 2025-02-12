@@ -5,32 +5,48 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from models.dbf_model import DBFModel
 from models.postgres_model import PostgresModel
-import config  # Import config to use DB_CONFIG
+from models.field_filter import FieldFilter
+import config
 
 def test_integration():
     """
-    Test integration between DBFModel and PostgresModel
+    Test integration between DBFModel and PostgresModel with field filtering
     """
     try:
         # Initialize models
-        dbf_model = DBFModel()  # Will use path from config.ini
-        postgres_model = PostgresModel(config.DB_CONFIG)  # Use proper DB config
+        dbf_model = DBFModel()
+        postgres_model = PostgresModel(config.DB_CONFIG)
+        
+        # Create field filter
+        field_filter = FieldFilter()
         
         # Read field information
         fields = dbf_model.read_field_info()
         t_name = dbf_model.get_table_name()
 
-        # Print field information
-        print("\nField Information:")
+        # Print original fields
+        print("\nOriginal Fields:")
         print('-' * 50)
         for field in fields:
+            print(f"Field: {field['name']}, Type: {field['type']}, Length: {field['length']}")
+        
+        # Add some fields to exclude
+        field_filter.configure()  # Example field to exclude
+        
+        # Get filtered fields
+        filtered_fields = field_filter.included_fields(fields)
+        
+        # Print filtered fields
+        print("\nFiltered Fields (after excluding 'BAN_MOSTRA'):")
+        print('-' * 50)
+        for field in filtered_fields:
             print(f"Field: {field['name']}, Type: {field['type']}, Length: {field['length']}")
         
         print(f"\nTable Name: {t_name}")
         print('-' * 50)
 
-        # Generate table SQL (will create preview file if preview_mode is true)
-        result = postgres_model.generate_table(t_name, fields)
+        # Generate table SQL with filtered fields
+        result = postgres_model.generate_table(t_name, filtered_fields)
         
         print("\nResult:")
         print('-' * 50)
