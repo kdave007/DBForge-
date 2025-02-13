@@ -1,8 +1,7 @@
-# models/database_connection.py
 import psycopg2
-from psycopg2 import pool
-from typing import Dict, Optional
+from psycopg2 import pool, errors
 from contextlib import contextmanager
+from typing import Dict, Optional, Tuple, List, Any
 
 class DBConnection:
     _instance = None
@@ -28,6 +27,9 @@ class DBConnection:
                 **self.db_config
             )
             print("Database pool initialized successfully")
+        except psycopg2.OperationalError as e:
+            print(f"Connection refused: Check your database credentials. Error: {e}")
+            self._pool = None
         except Exception as e:
             print(f"Error initializing connection pool: {e}")
             self._pool = None
@@ -41,15 +43,20 @@ class DBConnection:
                 with conn.cursor() as cur:
                     cur.execute(query)
         """
+        if self._pool is None:
+            raise ConnectionError("Database connection pool is not initialized. Check your credentials or database configuration.")
+
         conn = None
         try:
             conn = self._pool.getconn()
             yield conn
+        except psycopg2.OperationalError as e:
+            raise ConnectionError(f"Failed to get a connection from the pool: {e}")
         finally:
             if conn:
                 self._pool.putconn(conn)
 
-    def execute_query(self, query: str, params: tuple = None):
+    def execute_query(self, query: str, params: Optional[Tuple] = None) -> Optional[List[Tuple[Any, ...]]]:
         """
         Execute a SQL query
         Args:
@@ -58,18 +65,44 @@ class DBConnection:
         Returns:
             Query results if SELECT, otherwise number of affected rows
         """
-        with self.get_connection() as conn:
-            with conn.cursor() as cur:
-                try:
-                    cur.execute(query, params)
-                    if query.strip().upper().startswith('SELECT'):
-                        return cur.fetchall()
-                    else:
-                        conn.commit()
-                        return cur.rowcount
-                except Exception as e:
-                    conn.rollback()
-                    raise e
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    try:
+                        cur.execute(query, params)
+                        if query.strip().upper().startswith('SELECT'):
+                            return cur.fetchall()
+                        else:
+                            conn.commit()
+                            return cur.rowcount
+                    except errors.DuplicateTable as e:
+                        # Handle duplicate table error
+                        conn.rollback()
+                        print(f"Error: Table already exists. Details: {e}")
+                        return None
+                    except errors.UniqueViolation as e:
+                        # Handle unique constraint violation
+                        conn.rollback()
+                        print(f"Error: Unique constraint violation. Details: {e}")
+                        return None
+                    except errors.ProgrammingError as e:
+                        # Handle SQL syntax errors or invalid queries
+                        conn.rollback()
+                        print(f"Error: Invalid SQL query. Details: {e}")
+                        return None
+                    except errors.Error as e:
+                        # Handle all other PostgreSQL errors
+                        conn.rollback()
+                        print(f"Database error: {e}")
+                        return None
+                    except Exception as e:
+                        # Handle any other unexpected errors
+                        conn.rollback()
+                        print(f"Unexpected error: {e}")
+                        return None
+        except ConnectionError as e:
+            print(f"Database connection error: {e}")
+            return None
 
     def close_pool(self):
         """

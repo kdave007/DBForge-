@@ -54,11 +54,13 @@ def test_table_creation():
         db.close_pool()
         
 
-        print("\nTest completed successfully!")
+        print("\nTest completed")
         
     except Exception as e:
         print(f"\nError during test: {e}")
         raise e
+
+    print(f'end of the script')    
 
 if __name__ == "__main__":
     test_table_creation()
