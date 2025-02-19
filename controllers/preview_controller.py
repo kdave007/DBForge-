@@ -8,19 +8,18 @@ class PreviewController:
         except ValueError as e:
             raise RuntimeError(f"Failed to initialize preview generator: {e}")
 
-    def save_preview(self, content, table_name) -> str :
-        """ Save SQL preview to a file using configured extension.
-
+    
+    def save_preview(self, content: str, table_name: str) -> str | None :
+        """Save SQL preview to a file.
+        
             Args:
                 content: Raw SQL string to save
                 table_name: Target table name for filename
-        
+                
             Returns:
-                str: Path to saved file if successful, None otherwise
+                str: Path to saved file if successful
+                None: If saving failed
         """
-        self.preview = SQLPreview() if config.FEATURE_FLAGS.get('preview_mode', False) else None
-        print(f"Preview object created: {self.preview is not None}")
-
         try:
             return self.gen.save_preview(table_name, content ,None)
 
@@ -30,7 +29,4 @@ class PreviewController:
         except Exception as e:
             print(f"Unexpected error: {str(e)}")
             return None
-    
-
-
 

@@ -22,7 +22,8 @@ def load_config():
         'features': {
             'table_mode': 'basic',
             'preview_mode': 'false',  # Add default for preview mode
-            'preview_ext':'txt'
+            'preview_ext':'txt',
+            'execute_query':'false'
         }
     })
     
@@ -55,7 +56,8 @@ PATH_CONFIG = {
 FEATURE_FLAGS = {
     'table_mode': CONFIG['features']['table_mode'],
     'preview_mode': CONFIG['features'].getboolean('preview_mode', False),  # Convert to boolean
-    'preview_ext': CONFIG['features']['preview_ext']
+    'preview_ext': CONFIG['features']['preview_ext'],
+    'execute_query': CONFIG['features']['execute_query']
 }
 
 def get_table_mode():
