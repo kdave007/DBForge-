@@ -27,6 +27,9 @@ class SQLPreview:
             str: Path to the generated file
             ext: txt by default
         """
+        if not table_name:
+            raise ValueError("table_name cannot be empty")
+
         # Generate timestamp for unique filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         

@@ -7,24 +7,17 @@ from .table_generators import get_generator
 from .sql_preview import SQLPreview
 
 class PostgresModel:
-    def __init__(self, db_config: Dict[str, str] = config.DB_CONFIG) -> None:
-        """
-        Initialize with database connection parameters
-        """
-        self.db_config = db_config
-        
+    def __init__(self) -> None:
         # Debug print to check feature flags
         print("\nDebug - Feature Flags:")
+
         print(f"All flags: {config.FEATURE_FLAGS}")
-        print(f"Preview mode: {config.FEATURE_FLAGS.get('preview_mode', False)}")
-        
-        self.preview = SQLPreview() if config.FEATURE_FLAGS.get('preview_mode', False) else None
-        print(f"Preview object created: {self.preview is not None}")
-        
+    
         # Delegate to factory function
         self.generator = get_generator(self)
 
-    def convert_field_type(self, dbf_field: Dict[str, Any]) -> str:
+    @classmethod
+    def convert_field_type(cls, dbf_field: Dict[str, Any]) -> str:
         """
         Convert DBF field type to PostgreSQL type
         """
@@ -47,7 +40,7 @@ class PostgresModel:
 
     def generate_table(self, table_name: str, fields: List[Dict[str, Any]]) -> str:
         """
-        Generate CREATE TABLE SQL statement and optionally save preview
+        Generate CREATE TABLE SQL statement
         
         Args:
             table_name: Name of the table to create
@@ -75,16 +68,5 @@ class PostgresModel:
             fields=fields,
             primary_key=primary_key
         )
-        
-        # Debug print for preview mode
-        print(f"\nDebug - Generate Table:")
-        print(f"Preview mode active: {self.preview is not None}")
-        print(f"SQL Generated: {sql[:100]}...")  # Show first 100 chars of SQL
-        
-        # If in preview mode, save to file
-        if self.preview:
-            preview_path = self.preview.save_preview(table_name, sql)
-            print(f"Preview saved to: {preview_path}")
-            return f"SQL Preview saved to: {preview_path}"
-            
+      
         return sql
