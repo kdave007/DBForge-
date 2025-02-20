@@ -49,6 +49,7 @@ class PostgresModel:
         Returns:
             str: CREATE TABLE SQL statement or preview file path
         """
+        
         if not table_name or not isinstance(table_name, str):
             raise ValueError("Table name must be a non empty string")
             
@@ -68,5 +69,5 @@ class PostgresModel:
             fields=fields,
             primary_key=primary_key
         )
-      
+     
         return sql

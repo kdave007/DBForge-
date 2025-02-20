@@ -8,7 +8,7 @@ class TableCreationController:
         """Initialize models and other controllers"""
         self.sql_gen_controller = SQLGeneratorController()
         self.dbf_controller = DBFController()
-        self.db_connection = DBConnection()
+        #self.db_connection = DBConnection()
         
 
     def process_dbf(self, preview_en : bool):
@@ -23,20 +23,21 @@ class TableCreationController:
 
            # Generate table query
             sql_query = self.sql_gen_controller.gen_create_table(name, fields)
-
+            
             if not sql_query:
                 return "Failed to generate table query"
 
            # create preview 
             if preview_en:
                 self.preview_controller = PreviewController()
-                preview_path = self.preview_controller.save_preview(fields, name)
+                # pass the sql query to save preview and the table name
+                preview_path = self.preview_controller.save_preview(sql_query, name)
 
                 if preview_path:
                     print(f"Preview saved to: {preview_path}")
         
             
-
+            return sql_query
 
 
 
