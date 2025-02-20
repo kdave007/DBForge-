@@ -9,7 +9,7 @@ class TableCreationController:
         self.sql_gen_controller = SQLGeneratorController()
         self.dbf_controller = DBFController()
         self.db_connection = DBConnection()
-        self.preview_controller = PreviewController()
+        
 
     def process_dbf(self, preview_en : bool):
 
@@ -29,9 +29,13 @@ class TableCreationController:
 
            # create preview 
             if preview_en:
-                self.preview_controller.save_preview(fields, name)
+                self.preview_controller = PreviewController()
+                preview_path = self.preview_controller.save_preview(fields, name)
+
+                if preview_path:
+                    print(f"Preview saved to: {preview_path}")
         
-        
+            
 
 
 
