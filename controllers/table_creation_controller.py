@@ -1,6 +1,6 @@
 from controllers import SQLGeneratorController
 from controllers.preview_controller import PreviewController
-from models.db_connection import DBConnection
+from db_controller import DBConnection
 from controllers.dbf_controller import DBFController
 
 class TableCreationController:
@@ -11,7 +11,7 @@ class TableCreationController:
         #self.db_connection = DBConnection()
         
 
-    def process_dbf(self, preview_en : bool):
+    def process_dbf(self, preview_en : bool, exe_query: bool):
 
         try:
            # Get DBF data using existing DBFController
@@ -36,11 +36,12 @@ class TableCreationController:
                 if preview_path:
                     print(f"Preview saved to: {preview_path}")
         
-            
+
+            if exe_query:
+                db = DBConnection()
+
+
             return sql_query
-
-
-
 
 
         
