@@ -6,12 +6,12 @@ def test_table_creation_controller():
 
     # Test without preview
     print("Testing without preview:")
-    result = controller.process_dbf(preview_en=False)
+    result = controller.process_dbf(preview_en=False, exe_query=True)
     print(f"Result: {result}")
 
     # Test with preview
     print("\nTesting with preview:")
-    result = controller.process_dbf(preview_en=True)
+    result = controller.process_dbf(preview_en=True, exe_query=True)
     print(f"Result: {result}")
 
 # Run the test

@@ -1,49 +1,120 @@
+from dataclasses import dataclass
+from typing import Optional
+
 from controllers import SQLGeneratorController
 from controllers.preview_controller import PreviewController
-from db_controller import DBConnection
+from controllers.db_controller import DBConnection
 from controllers.dbf_controller import DBFController
+from config import DB_CONFIG
+
+@dataclass
+class ProcessResult:
+    success: bool
+    message: str
+    sql_query: Optional[str] = None
+    preview_path: Optional[str] = None
 
 class TableCreationController:
     def __init__(self):
         """Initialize models and other controllers"""
         self.sql_gen_controller = SQLGeneratorController()
         self.dbf_controller = DBFController()
-        #self.db_connection = DBConnection()
-        
+        self.preview_controller = None
+        self.db_connection = None
 
-    def process_dbf(self, preview_en : bool, exe_query: bool):
-
+    def _get_db_connection(self) -> Optional[DBConnection]:
+        """
+        Get or create a database connection.
+        """
         try:
-           # Get DBF data using existing DBFController
+            if self.db_connection is None:
+                self.db_connection = DBConnection(DB_CONFIG, 1, 1)
+            else:
+                self.db_connection.ensure_pool_is_open()
+            return self.db_connection
+        except Exception as e:
+            print(f"Error getting database connection: {e}")
+            return None
+
+    def process_dbf(self, preview_en: bool, exe_query: bool) -> ProcessResult:
+        """
+        Process the DBF file, generate SQL, and optionally execute the query and save a preview.
+
+        Args:
+            preview_en (bool): Whether to generate a preview.
+            exe_query (bool): Whether to execute the SQL query.
+
+        Returns:
+            ProcessResult: A dataclass containing the result of the operation.
+        """
+        try:
+            # Get DBF data using existing DBFController
             fields = self.dbf_controller.read_dbf_fields()
             name = self.dbf_controller.get_file_name()
 
             if not fields or not name:
-                return "Failed to read DBF file"
+                return ProcessResult(success=False, message="Failed to read DBF file")
 
-           # Generate table query
+            # Generate table query
             sql_query = self.sql_gen_controller.gen_create_table(name, fields)
-            
             if not sql_query:
-                return "Failed to generate table query"
+                return ProcessResult(success=False, message="Failed to generate table query")
 
-           # create preview 
+            # Create preview if enabled
+            preview_path = None
             if preview_en:
                 self.preview_controller = PreviewController()
-                # pass the sql query to save preview and the table name
                 preview_path = self.preview_controller.save_preview(sql_query, name)
+                if not preview_path:
+                    return ProcessResult(
+                        success=False,
+                        message="Failed to save preview",
+                        sql_query=sql_query,
+                    )
+                print(f"Preview saved to: {preview_path}")
 
-                if preview_path:
-                    print(f"Preview saved to: {preview_path}")
-        
-
+            # Execute query if enabled
             if exe_query:
-                db = DBConnection()
+                db = self._get_db_connection()
+                if db is None:
+                    return ProcessResult(
+                        success=False,
+                        message="Failed to establish database connection",
+                        sql_query=sql_query,
+                        preview_path=preview_path,
+                    )
 
+                result = db.execute_query(sql_query)
+                if result is None:
+                    return ProcessResult(
+                        success=False,
+                        message="Query execution failed",
+                        sql_query=sql_query,
+                        preview_path=preview_path,
+                    )
 
-            return sql_query
+            # Return success with SQL query and preview path (if applicable)
+            return ProcessResult(
+                success=True,
+                message="Process completed successfully",
+                sql_query=sql_query,
+                preview_path=preview_path,
+            )
 
-
-        
         except Exception as e:
-            return null
+            print(f"Unexpected error: {e}")
+            return ProcessResult(
+                success=False,
+                message=f"Unexpected error: {e}",
+                sql_query=sql_query if 'sql_query' in locals() else None,
+                preview_path=preview_path if 'preview_path' in locals() else None,
+            )
+
+    def cleanup(self):
+        """
+        Clean up resources when done with the controller.
+        Call this method when you're completely done with database operations.
+        """
+        if self.db_connection and self.db_connection._pool:
+            self.db_connection.close_pool()
+            self.db_connection = None

@@ -10,6 +10,10 @@ class DBConnection:
     def __new__(cls, db_config: Dict[str, str], min_conn: int = 1, max_conn: int = 10):
         if cls._instance is None:
             cls._instance = super(DBConnection, cls).__new__(cls)
+            # Ensure client_encoding is set
+            if 'client_encoding' not in db_config:
+                db_config['client_encoding'] = 'UTF8'
+
             cls._instance.db_config = db_config
             cls._instance.min_conn = min_conn
             cls._instance.max_conn = max_conn
@@ -21,18 +25,41 @@ class DBConnection:
         Initialize the connection pool
         """
         try:
+            if self._pool is not None:
+                # If pool exists but is closed, create a new one
+                if hasattr(self._pool, '_closed') and self._pool._closed:
+                    self._pool = None
+                else:
+                    return  # Pool exists and is open, no need to reinitialize
+
             self._pool = psycopg2.pool.ThreadedConnectionPool(
                 minconn=self.min_conn,
                 maxconn=self.max_conn,
                 **self.db_config
             )
             print("Database pool initialized successfully")
-        except psycopg2.OperationalError as e:
-            print(f"Connection refused: Check your database credentials. Error: {e}")
+        except (psycopg2.Error, psycopg2.OperationalError) as e:
+            error_msg = str(e)
+            if "password authentication failed" in error_msg.lower():
+                print("Authentication Error: Invalid username or password")
+            elif "database" in error_msg.lower() and "does not exist" in error_msg.lower():
+                print("Database Error: The specified database does not exist")
+            elif "role" in error_msg.lower() and "does not exist" in error_msg.lower():
+                print("Authentication Error: The specified user/role does not exist")
+            else:
+                print(f"Connection Error: {error_msg}")
             self._pool = None
         except Exception as e:
             print(f"Error initializing connection pool: {e}")
             self._pool = None
+
+    def ensure_pool_is_open(self):
+        """
+        Ensure the connection pool is open and available.
+        Reinitialize if closed.
+        """
+        if self._pool is None or (hasattr(self._pool, '_closed') and self._pool._closed):
+            self._initialize_pool()
 
     @contextmanager
     def get_connection(self):
@@ -43,6 +70,7 @@ class DBConnection:
                 with conn.cursor() as cur:
                     cur.execute(query)
         """
+        self.ensure_pool_is_open()
         if self._pool is None:
             raise ConnectionError("Database connection pool is not initialized. Check your credentials or database configuration.")
 

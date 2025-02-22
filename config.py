@@ -30,12 +30,21 @@ def load_config():
     # Load user config if exists
     config_path = Path(__file__).parent / 'config.ini'
     if config_path.exists():
-        config.read(config_path)
+        try:
+            config.read(config_path, encoding='utf-8')
+        except UnicodeDecodeError:
+            # Try with latin-1 encoding if UTF-8 fails
+            config.read(config_path, encoding='latin-1')
     
     return config
 
 # Initialize configuration
 CONFIG = load_config()
+
+# Register Unicode support for psycopg2
+import psycopg2.extensions
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
 
 # Expose typed configurations
 DB_CONFIG = {
