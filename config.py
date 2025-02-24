@@ -66,7 +66,7 @@ FEATURE_FLAGS = {
     'table_mode': CONFIG['features']['table_mode'],
     'preview_mode': CONFIG['features'].getboolean('preview_mode', False),  # Convert to boolean
     'preview_ext': CONFIG['features']['preview_ext'],
-    'execute_query': CONFIG['features']['execute_query']
+    'execute_query': CONFIG['features'].getboolean('execute_query', False)  # Convert to boolean 
 }
 
 def get_table_mode():

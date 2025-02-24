@@ -63,6 +63,7 @@ class TableCreationController:
             # Create preview if enabled
             preview_path = None
             if preview_en:
+                print(f' ------------ preview_en  {preview_en} ')
                 self.preview_controller = PreviewController()
                 preview_path = self.preview_controller.save_preview(sql_query, name)
                 if not preview_path:
@@ -75,6 +76,7 @@ class TableCreationController:
 
             # Execute query if enabled
             if exe_query:
+                print(f' ------------ exe query {exe_query} ')
                 db = self._get_db_connection()
                 if db is None:
                     return ProcessResult(
