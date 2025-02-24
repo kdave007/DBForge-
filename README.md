@@ -5,6 +5,8 @@ A Python-based tool to convert DBF files to PostgreSQL tables using MVC architec
 ## 🏗️ Project Structure
 ```
 dbf_to_postgres/
+│── secure/           # Secure configuration data
+│   ├── secure_config.ini
 │── config.ini          # Configuration file
 │── data/              # Directory for DBF files
 │── scripts/           # Generated SQL scripts

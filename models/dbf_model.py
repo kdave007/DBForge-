@@ -16,14 +16,14 @@ class DBFModel:
         """
         if dbf_filename is None:
             # Use path directly from config
-            self.dbf_path = str(PATH_CONFIG['dbf'])  # Convert Path to string
+            self.dbf_path = str(PATH_CONFIG['dbf_directory'])  # Convert Path to string
         else:
             # If it looks like a full path, use it as is
             if os.path.isabs(dbf_filename) or '../' in dbf_filename:
                 self.dbf_path = dbf_filename
             else:
                 # Otherwise join it with the config directory
-                self.dbf_path = str(os.path.join(PATH_CONFIG['dbf'], dbf_filename))
+                self.dbf_path = str(os.path.join(PATH_CONFIG['dbf_directory'], dbf_filename))
         
         self.dbf_data: List[Dict[str, Any]] = []
         # Store paths to memo files
