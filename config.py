@@ -1,12 +1,13 @@
 import os
 import configparser
 from pathlib import Path
+import sys
 from typing import Any, Dict
 
 # Default configuration values
 DEFAULT_CONFIG = {
     'paths': {
-        'dbf_directory': '../mockDBF/CANCFDI.DBF',
+        'dbf_directory': '../mockDBF/CANCFFI.DBF',
         'sql_output': '../'
     },
     'features': {
@@ -61,7 +62,16 @@ def load_config(config_path: str) -> configparser.ConfigParser:
     return config
 
 # Get the directory where the executable/script is located
-BASE_DIR = Path(__file__).resolve().parent
+def get_app_path():
+    """Get the application base path that works both in dev and PyInstaller"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled exe
+        return Path(sys.executable).parent
+    else:
+        # Running in development
+        return Path(__file__).resolve().parent
+
+BASE_DIR = get_app_path()
 
 # Load public configuration
 CONFIG = load_config(os.path.join(BASE_DIR, 'config.ini'))
