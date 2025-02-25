@@ -8,3 +8,5 @@ secure/**/*
 
 /logs/**/*
 
+/build/**/*
+/dist/**/* 
