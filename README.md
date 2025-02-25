@@ -21,6 +21,17 @@ dbf_to_postgres/
 │── main.py           # Application entry point
 │── requirements.txt   # Project dependencies
 │── build_executable.bat # Compilation script
+
+
+create the secure_config.ini file as :
+
+[database]
+host = localhost
+port = 5432
+database = dbname
+user = user
+password = wdqwdqwdqwd
+
 ```
 
 ## 🚀 Getting Started
@@ -32,6 +43,7 @@ dbf_to_postgres/
 
 2. Configure the application:
    - Edit `config.ini` with your PostgreSQL credentials
+   - create dir and file as  `secure/secure_config.ini` with your db config 
    - Place your DBF files in the `data/` directory
 
 3. Run the application:

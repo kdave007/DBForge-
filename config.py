@@ -10,7 +10,7 @@ DEFAULT_CONFIG = {
         'sql_output': '../'
     },
     'features': {
-        'table_mode': 'basic',  # basic, timestamp, audit
+        'table_mode': 'raw',  # raw, basic, timestamp, audit
         'preview_mode': 'false',
         'preview_ext': 'txt',   # txt, sql
         'execute_query': 'false',

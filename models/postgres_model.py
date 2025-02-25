@@ -13,8 +13,8 @@ class PostgresModel:
 
         print(f"All flags: {config.FEATURE_FLAGS}")
     
-        # Delegate to factory function
-        self.generator = get_generator(self)
+        # Get generator without passing self
+        self.generator = get_generator()
 
     @classmethod
     def convert_field_type(cls, dbf_field: Dict[str, Any]) -> str:
