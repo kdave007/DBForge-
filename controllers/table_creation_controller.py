@@ -142,7 +142,7 @@ class TableCreationController:
                     return ProcessResult(
                         success=False,
                         message="Failed to save preview",
-                        sql_query=sql_query,
+                        
                     )
                 print(f"Preview saved to: {preview_path}")
 
@@ -154,7 +154,7 @@ class TableCreationController:
                     return ProcessResult(
                         success=False,
                         message="Failed to establish database connection",
-                        sql_query=sql_query,
+                        
                         preview_path=preview_path,
                     )
 
@@ -163,7 +163,7 @@ class TableCreationController:
                     return ProcessResult(
                         success=False,
                         message="Query execution failed",
-                        sql_query=sql_query,
+                        
                         preview_path=preview_path,
                     )
 
@@ -171,7 +171,7 @@ class TableCreationController:
             return ProcessResult(
                 success=True,
                 message="Process completed successfully",
-                sql_query=sql_query,
+                
                 preview_path=preview_path,
             )
 

@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2 import pool, errors
 from contextlib import contextmanager
 from typing import Dict, Optional, Tuple, List, Any
+import logging
 
 class DBConnection:
     _instance = None
@@ -106,27 +107,37 @@ class DBConnection:
                     except errors.DuplicateTable as e:
                         # Handle duplicate table error
                         conn.rollback()
-                        print(f"Error: Table already exists. Details: {e}")
+                        error_msg = f"Error: Table already exists. Details: {e}"
+                        logging.error(error_msg)
+                        print(error_msg)
                         return None
                     except errors.UniqueViolation as e:
                         # Handle unique constraint violation
                         conn.rollback()
-                        print(f"Error: Unique constraint violation. Details: {e}")
+                        error_msg = f"Error: Unique constraint violation. Details: {e}"
+                        logging.error(error_msg)
+                        print(error_msg)
                         return None
                     except errors.ProgrammingError as e:
                         # Handle SQL syntax errors or invalid queries
                         conn.rollback()
-                        print(f"Error: Invalid SQL query. Details: {e}")
+                        error_msg = f"Error: Invalid SQL query. Details: {e}"
+                        logging.error(error_msg)
+                        print(error_msg)
                         return None
                     except errors.Error as e:
                         # Handle all other PostgreSQL errors
                         conn.rollback()
-                        print(f"Database error: {e}")
+                        error_msg = f"Error: {e}"
+                        logging.error(error_msg)
+                        print(error_msg)
                         return None
                     except Exception as e:
                         # Handle any other unexpected errors
                         conn.rollback()
-                        print(f"Unexpected error: {e}")
+                        error_msg = f"Error: Unexpected error. Details: {e}"
+                        logging.error(error_msg)
+                        print(error_msg)
                         return None
         except ConnectionError as e:
             print(f"Database connection error: {e}")

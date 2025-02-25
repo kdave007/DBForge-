@@ -18,7 +18,7 @@ def setup_logging():
         level=logging.INFO,
         format=log_format,
         handlers=[
-            logging.FileHandler(f"logs/dbforge_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"),
+            logging.FileHandler(f"logs/dbforge_{datetime.now().strftime('%Y%m%d')}.log"),
             logging.StreamHandler(sys.stdout)
         ]
     )
@@ -40,7 +40,7 @@ def main():
     """Main entry point of the application"""
     # Setup logging
     setup_logging()
-    logging.info("Starting DBForge...")
+    logging.info("--------------------Starting DBForge...----------------------")
     
     # Parse command line arguments
     args = parse_args()
@@ -87,7 +87,7 @@ def main():
         # Always cleanup resources
         try:
             controller.cleanup()
-            logging.info("Cleanup completed")
+            logging.info("//////////// Cleanup completed /////////////")
         except Exception as e:
             logging.error(f"Error during cleanup: {str(e)}", exc_info=True)
 
