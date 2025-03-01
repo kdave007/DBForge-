@@ -107,12 +107,23 @@ class DBFModel:
         field_info = []
         try:
             with DBF(self.dbf_path) as dbf:
+
+                # for field in dbf.fields:
+                #     print(f"Field: {field.name}, Type: {field.type}, Length: {field.length}, decimal_count {field.decimal_count}")
+
+                # # Check if 'decimal' attribute exists
+                # if hasattr(field, 'decimal_count'):
+                #     print(f"Decimal places: {field.decimal_count}")
+                # else:
+                #     print("No 'decimal' attribute found for this field")
+
+
                 for field in dbf.fields:
                     field_data = {
                         'name': field.name,
                         'type': field.type,
                         'length': field.length,
-                        'decimal': field.decimal if hasattr(field, 'decimal') else 0,
+                        'decimal': field.decimal_count if hasattr(field, 'decimal_count') else 0,
                         # By default, allow NULL values for all fields
                         'not_null': False,
                         # For character fields, treat empty strings as NULL by default
