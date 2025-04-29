@@ -4,18 +4,20 @@ import config
 from .db_connection import DBConnection
 from .type_mapping import TypeMapping
 from .table_generators import get_generator
+from .sql_preview import SQLPreview
 
 class PostgresModel:
-    def __init__(self, db_config: Dict[str, str] = config.DB_CONFIG) -> None:
-        """
-        Initialize with database connection parameters
-        """
-        self.db_config = db_config
+    def __init__(self) -> None:
+        # Debug print to check feature flags
+        print("\nDebug - Feature Flags:")
 
-        # Delegate to factory function
-        self.generator = get_generator(self)
+        print(f"All flags: {config.FEATURE_FLAGS}")
+    
+        # Get generator without passing self
+        self.generator = get_generator()
 
-    def convert_field_type(self, dbf_field: Dict[str, Any]) -> str:
+    @classmethod
+    def convert_field_type(cls, dbf_field: Dict[str, Any]) -> str:
         """
         Convert DBF field type to PostgreSQL type
         """
@@ -36,20 +38,22 @@ class PostgresModel:
         except ValueError as e:
             raise ValueError(f"Invalid field value: {e}")
 
-
-    def generate_table(self, table_name : str, fields : Dict[str, Any]) -> str :
+    def generate_table(self, table_name: str, fields: List[Dict[str, Any]]) -> str:
         """
-            Generate CREATE TABLE SQL statement
-            Args:
-                table_name: Name of the table to create
-                fields: List of field definitions
-            Returns:
-                str: CREATE TABLE SQL statement
+        Generate CREATE TABLE SQL statement
+        
+        Args:
+            table_name: Name of the table to create
+            fields: List of field definitions
+            
+        Returns:
+            str: CREATE TABLE SQL statement or preview file path
         """
-        if not table_name or not isinstance(table_name,str):
+        
+        if not table_name or not isinstance(table_name, str):
             raise ValueError("Table name must be a non empty string")
-
-         # Check for existing ID fields
+            
+        # Check for existing ID fields
         existing_ids = {'id', 'rowid', 'record_id'}
         field_names = {field['name'].lower() for field in fields}
         
@@ -59,9 +63,11 @@ class PostgresModel:
             "local_rowid"
         )    
 
-        # Delegate to generator with validation context
-        return self.generator.generate_table(
+        # Generate SQL
+        sql = self.generator.generate_table(
             table_name=table_name,
             fields=fields,
             primary_key=primary_key
         )
+     
+        return sql

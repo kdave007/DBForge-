@@ -1,7 +1,7 @@
 from models import DBFModel
 
 # Sample DBF file path (replace with your actual file path)
-SAMPLE_DBF = "mockDBF/PARTVTA.dbf"
+SAMPLE_DBF = "mockDBF\PARTVTA.dbf"
 
 def test_dbf_model(file_path):
     print(f"\nTesting DBF Model with file: {file_path}")
